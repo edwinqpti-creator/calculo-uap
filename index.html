@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>CÁLCULO ⚡ | UAP Pando</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Exo+2:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:#030812; --bg2:#071428; --card:rgba(8,22,48,.85);
+  --text:#e8f4ff; --muted:#8ab4d8;
+  --neon:#00e5ff; --neon2:#00ff9d; --accent:#0077ff;
+  --danger:#ff3366; --warn:#ffea00;
+  --shadow:0 0 28px rgba(0,229,255,.45);
+  --btn-glow:0 0 22px rgba(0,229,255,.55);
+  --pspeed:6.5s; --pcolor:#00e5ff;
+}
+[data-theme="light"]{
+  --bg:#e8f4fc; --bg2:#d0e8f8; --card:rgba(255,255,255,.9);
+  --text:#0a1a2e; --muted:#3a5a7a;
+  --neon:#0066cc; --neon2:#00995c; --accent:#0055aa;
+  --danger:#cc2244; --warn:#cc9900;
+  --shadow:0 0 20px rgba(0,100,200,.22);
+  --btn-glow:0 0 16px rgba(0,100,200,.3);
+  --pcolor:#0088cc;
+}
+[data-climate="surazo"]{ --neon:#00d4ff; --neon2:#4fc3f7; --accent:#0288d1; --pcolor:#00d4ff; --shadow:0 0 30px rgba(0,212,255,.5); }
+[data-climate="normal"]{ --neon:#00e676; --neon2:#00bcd4; --accent:#00acc1; --pcolor:#00e676; --shadow:0 0 28px rgba(0,230,118,.45); }
+[data-climate="extremo"]{ --neon:#ff1744; --neon2:#ffea00; --accent:#ff6d00; --pcolor:#ff1744; --shadow:0 0 32px rgba(255,23,68,.55); --pspeed:2.8s; }
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Exo 2',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;transition:background .4s,color .3s}
+
+.bg-layer{position:fixed;inset:0;z-index:-3;
+  background:radial-gradient(ellipse at 15% 20%,color-mix(in srgb,var(--neon) 16%,transparent) 0%,transparent 55%),
+             radial-gradient(ellipse at 85% 75%,color-mix(in srgb,var(--accent) 12%,transparent) 0%,transparent 50%),
+             linear-gradient(165deg,var(--bg) 0%,var(--bg2) 55%,var(--bg) 100%);
+  transition:background .5s}
+.particles{position:fixed;inset:0;z-index:-2;pointer-events:none;overflow:hidden}
+.particle{position:absolute;border-radius:50%;background:var(--pcolor);
+  box-shadow:0 0 12px var(--pcolor),0 0 24px var(--pcolor);animation:rise var(--pspeed) linear infinite;opacity:.75}
+@keyframes rise{0%{transform:translateY(110vh) scale(.3);opacity:0}8%{opacity:.85}92%{opacity:.55}100%{transform:translateY(-12vh) scale(1.5);opacity:0}}
+
+header{position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;
+  padding:.65rem 1.3rem;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(16px);
+  border-bottom:1px solid color-mix(in srgb,var(--neon) 32%,transparent);box-shadow:0 4px 28px rgba(0,0,0,.25)}
+.logos-left{display:flex;align-items:center;gap:1.35rem}
+.logos-left img{height:96px;width:auto;object-fit:contain;background:transparent!important;
+  filter:drop-shadow(0 0 10px color-mix(in srgb,var(--neon) 38%,transparent));transition:transform .25s}
+[data-theme="light"] .logos-left img{filter:drop-shadow(0 2px 6px rgba(0,0,0,.15))}
+.logos-left img:hover{transform:scale(1.07)}
+.header-right{display:flex;align-items:center;gap:1.2rem}
+.app-logo-block{display:flex;align-items:center;gap:.5rem}
+.app-logo-img{height:76px;filter:drop-shadow(0 0 12px rgba(0,140,255,.5))}
+.app-title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.8rem;letter-spacing:.05em;color:#1a6dff}
+[data-theme="light"] .app-title{color:#0055cc}
+.bolt{font-size:2rem;color:var(--neon2);text-shadow:0 0 12px var(--neon2),0 0 26px var(--neon2);animation:boltP 1.5s ease-in-out infinite}
+@keyframes boltP{0%,100%{transform:scale(1)}50%{transform:scale(1.15);opacity:.85}}
+
+.theme-toggle{width:56px;height:28px;border-radius:18px;border:2px solid var(--neon);
+  background:color-mix(in srgb,var(--card) 90%,transparent);cursor:pointer;position:relative;box-shadow:var(--btn-glow);transition:all .3s}
+.theme-toggle::after{content:'';position:absolute;top:2px;left:3px;width:20px;height:20px;border-radius:50%;
+  background:var(--neon);box-shadow:0 0 10px var(--neon);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+[data-theme="light"] .theme-toggle::after{transform:translateX(26px);background:#ffaa00;box-shadow:0 0 12px #ffaa00}
+
+main{max-width:1360px;margin:0 auto;padding:1.2rem 1rem 4rem}
+.section-label{font-family:'Orbitron',sans-serif;font-size:1.05rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--neon);text-align:center;margin:1.1rem 0 .85rem;text-shadow:0 0 12px color-mix(in srgb,var(--neon) 45%,transparent)}
+.group-title{font-family:'Orbitron',sans-serif;font-size:1.05rem;letter-spacing:.08em;color:var(--neon2);
+  margin:1.6rem 0 .7rem;padding-left:.4rem;border-left:4px solid var(--neon2);text-shadow:0 0 10px color-mix(in srgb,var(--neon2) 40%,transparent)}
+
+.climate-row{display:flex;justify-content:center;gap:.9rem;flex-wrap:wrap;margin-bottom:1.4rem}
+.climate-btn{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.95rem;padding:1rem 1.5rem;border-radius:15px;
+  border:2px solid transparent;background:var(--card);color:var(--text);cursor:pointer;min-width:165px;
+  box-shadow:0 6px 18px rgba(0,0,0,.2);transition:all .25s}
+.climate-btn:hover{transform:translateY(-3px);box-shadow:0 10px 26px rgba(0,0,0,.28),var(--btn-glow)}
+.climate-btn.active{border-color:var(--neon);box-shadow:0 0 26px color-mix(in srgb,var(--neon) 42%,transparent),inset 0 0 16px color-mix(in srgb,var(--neon) 12%,transparent);color:#fff;text-shadow:0 0 8px var(--neon)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:1.15rem;margin-bottom:1.2rem}
+.card{background:var(--card);border:2px solid color-mix(in srgb,var(--neon) 20%,transparent);border-radius:18px;
+  padding:1rem .95rem 1.1rem;position:relative;overflow:hidden;transition:all .28s;
+  box-shadow:0 8px 26px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.05);backdrop-filter:blur(10px)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--neon),transparent);opacity:.65}
+.card:hover{transform:translateY(-4px);border-color:var(--neon);box-shadow:0 12px 36px rgba(0,0,0,.28),var(--shadow)}
+.card.active-card{border-color:var(--neon2);box-shadow:0 0 30px color-mix(in srgb,var(--neon2) 32%,transparent)}
+
+.card-img{width:100%;height:110px;object-fit:contain;margin-bottom:.4rem;filter:drop-shadow(0 0 10px color-mix(in srgb,var(--neon) 40%,transparent));transition:filter .3s}
+.card.active-card .card-img{filter:drop-shadow(0 0 16px var(--neon2))}
+.card h3{font-family:'Orbitron',sans-serif;font-size:.88rem;text-align:center;margin-bottom:.55rem;color:var(--text)}
+
+.check-row{display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:.7rem}
+.check-row label{font-size:.84rem;font-weight:600;color:var(--muted);cursor:pointer;user-select:none}
+.check-box{width:22px;height:22px;accent-color:var(--neon);cursor:pointer;transform:scale(1.12)}
+
+.power-row{display:flex;gap:.35rem;margin-bottom:.7rem}
+.pwr{flex:1;padding:.48rem .15rem;border-radius:11px;border:2px solid transparent;
+  background:color-mix(in srgb,var(--bg) 55%,transparent);color:var(--muted);font-weight:700;font-size:.74rem;
+  cursor:pointer;text-align:center;transition:all .2s;box-shadow:0 2px 7px rgba(0,0,0,.12)}
+.pwr small{display:block;font-size:.64rem;opacity:.8;margin-top:1px}
+.pwr:hover{background:color-mix(in srgb,var(--neon) 12%,transparent)}
+.pwr.active{color:#fff;border-color:var(--p);background:color-mix(in srgb,var(--p) 26%,transparent);
+  box-shadow:0 0 14px color-mix(in srgb,var(--p) 38%,transparent);text-shadow:0 0 7px var(--p)}
+.pwr.bajo{--p:#00e676}.pwr.medio{--p:#ffea00}.pwr.alto{--p:#ff1744}
+
+.inputs-block{opacity:.4;pointer-events:none;transition:opacity .25s}
+.card.active-card .inputs-block{opacity:1;pointer-events:auto}
+.input-row{display:flex;gap:.5rem;margin-bottom:.35rem}
+.input-row label{flex:1;font-size:.78rem;color:var(--muted)}
+.input-row input[type=number]{
+  width:100%;padding:.45rem .5rem;border-radius:10px;border:2px solid color-mix(in srgb,var(--neon) 35%,transparent);
+  background:color-mix(in srgb,var(--bg) 70%,transparent);color:var(--text);font-family:'Orbitron',sans-serif;
+  font-size:.9rem;font-weight:700;text-align:center;outline:none;transition:border .2s,box-shadow .2s}
+.input-row input[type=number]:focus{border-color:var(--neon);box-shadow:0 0 12px color-mix(in srgb,var(--neon) 35%,transparent)}
+.card-kwh{font-family:'Orbitron',sans-serif;font-size:.84rem;text-align:right;margin-top:.35rem;color:var(--neon2);
+  text-shadow:0 0 7px color-mix(in srgb,var(--neon2) 35%,transparent);min-height:1.15em}
+
+.action-wrap{text-align:center;margin:1.6rem 0 2rem}
+.btn-show{font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(1.05rem,3.2vw,1.4rem);letter-spacing:.05em;
+  padding:1.3rem 2.6rem;border:none;border-radius:17px;cursor:pointer;color:#fff;
+  background:linear-gradient(135deg,var(--neon),var(--accent));
+  box-shadow:0 8px 30px color-mix(in srgb,var(--neon) 42%,transparent),0 0 0 3px color-mix(in srgb,var(--neon) 28%,transparent),inset 0 1px 0 rgba(255,255,255,.22);
+  text-shadow:0 0 10px rgba(0,0,0,.25);transition:all .25s;position:relative;overflow:hidden}
+.btn-show::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.22) 50%,transparent 70%);transform:translateX(-120%);transition:transform .5s}
+.btn-show:hover{transform:translateY(-4px) scale(1.03);box-shadow:0 12px 42px color-mix(in srgb,var(--neon) 52%,transparent),0 0 0 4px color-mix(in srgb,var(--neon) 38%,transparent)}
+.btn-show:hover::after{transform:translateX(120%)}
+.btn-show:active{transform:translateY(0) scale(.98)}
+
+.modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(0,5,16,.85);backdrop-filter:blur(14px);
+  display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .35s,visibility .35s;padding:1rem}
+.modal-overlay.open{opacity:1;visibility:visible}
+.modal{width:min(960px,96vw);max-height:93vh;overflow-y:auto;background:var(--card);border:2px solid var(--neon);
+  border-radius:22px;padding:1.5rem 1.4rem 1.7rem;box-shadow:0 0 55px color-mix(in srgb,var(--neon) 32%,transparent),0 22px 70px rgba(0,0,0,.5);
+  transform:scale(.88) translateY(28px);transition:transform .4s cubic-bezier(.34,1.4,.64,1);position:relative}
+.modal-overlay.open .modal{transform:scale(1) translateY(0)}
+.modal-close{position:absolute;top:12px;right:14px;width:38px;height:38px;border-radius:50%;border:2px solid var(--neon);
+  background:color-mix(in srgb,var(--bg) 70%,transparent);color:var(--neon);font-size:1.3rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 0 14px color-mix(in srgb,var(--neon) 35%,transparent);transition:all .2s}
+.modal-close:hover{background:var(--neon);color:#fff;transform:rotate(90deg)}
+.modal h2{font-family:'Orbitron',sans-serif;font-size:1.4rem;color:var(--neon);text-align:center;margin-bottom:1.2rem;
+  text-shadow:0 0 12px color-mix(in srgb,var(--neon) 42%,transparent);letter-spacing:.04em}
+
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:.85rem;margin-bottom:1.3rem}
+.metric{background:color-mix(in srgb,var(--bg) 52%,transparent);border-radius:13px;padding:.95rem .7rem;text-align:center;
+  border:1px solid color-mix(in srgb,var(--neon) 18%,transparent);box-shadow:inset 0 0 18px color-mix(in srgb,var(--neon) 5%,transparent)}
+.metric .lbl{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.25rem}
+.metric .val{font-family:'Orbitron',sans-serif;font-size:1.5rem;font-weight:800;color:var(--text)}
+.metric .val.big{font-size:1.85rem;color:var(--neon2);text-shadow:0 0 12px color-mix(in srgb,var(--neon2) 48%,transparent)}
+.metric .unit{font-size:.76rem;color:var(--muted)}
+
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.15rem;margin-bottom:1.1rem}
+@media(max-width:720px){.modal-grid{grid-template-columns:1fr}.logos-left img{height:64px}.app-title{font-size:1.3rem}.app-logo-img{height:54px}}
+.blocks-table{width:100%;border-collapse:collapse;font-size:.86rem}
+.blocks-table th,.blocks-table td{padding:.5rem .55rem;border-bottom:1px solid color-mix(in srgb,var(--neon) 14%,transparent)}
+.blocks-table th{font-family:'Orbitron',sans-serif;font-size:.7rem;color:var(--neon);letter-spacing:.03em;text-align:left}
+.blocks-table td:last-child{text-align:right;font-family:'Orbitron',sans-serif;color:var(--neon2)}
+.chart-box{height:230px;background:color-mix(in srgb,var(--bg) 38%,transparent);border-radius:13px;padding:.35rem}
+
+/* ===== MATH MODULE - FORMAL ===== */
+.math-section{margin-top:.7rem;border:1px solid color-mix(in srgb,var(--neon) 22%,transparent);border-radius:14px;overflow:hidden}
+.math-toggle{width:100%;padding:.8rem 1rem;background:color-mix(in srgb,var(--neon) 11%,transparent);border:none;
+  color:var(--neon);font-family:'Orbitron',sans-serif;font-size:.9rem;cursor:pointer;text-align:left;
+  display:flex;justify-content:space-between;align-items:center;transition:background .2s}
+.math-toggle:hover{background:color-mix(in srgb,var(--neon) 18%,transparent)}
+.math-body{max-height:0;overflow:hidden;transition:max-height .45s ease;background:color-mix(in srgb,var(--bg) 48%,transparent)}
+.math-body.open{max-height:2200px}
+.math-content{padding:1.15rem 1.2rem}
+
+.math-block{margin-bottom:1.5rem;padding-bottom:1.2rem;border-bottom:1px dashed color-mix(in srgb,var(--neon) 25%,transparent)}
+.math-block:last-child{border-bottom:none;margin-bottom:0}
+.math-block .app-name{font-family:'Orbitron',sans-serif;font-size:1.15rem;color:var(--neon2);margin-bottom:.55rem;
+  text-shadow:0 0 10px color-mix(in srgb,var(--neon2) 40%,transparent)}
+.math-block .model-label{font-size:.95rem;color:var(--muted);margin-bottom:.7rem;font-weight:600}
+.eq-line{font-size:1.35rem;line-height:1.7;color:var(--text);margin:.5rem 0;font-family:'Exo 2',sans-serif;letter-spacing:.01em}
+.eq-line .int{font-size:1.7rem;vertical-align:-.15em}
+.eq-line .lim{font-size:.78rem;vertical-align:.4em}
+.eq-line .frac{display:inline-block;text-align:center;vertical-align:middle;line-height:1.15}
+.eq-line .frac .num{display:block;border-bottom:1.5px solid var(--text);padding:0 .25rem .1rem}
+.eq-line .frac .den{display:block;padding:.1rem .25rem 0}
+.eq-result{font-family:'Orbitron',sans-serif;font-size:1.2rem;color:var(--neon2);margin-top:.45rem;
+  text-shadow:0 0 8px color-mix(in srgb,var(--neon2) 35%,transparent)}
+.where-list{margin:.6rem 0 .5rem 1.1rem;font-size:.95rem;line-height:1.55;color:var(--text)}
+.where-list li{margin-bottom:.25rem}
+.where-list strong{color:var(--neon)}
+.tariff-math{margin-top:1rem;padding:1rem;background:color-mix(in srgb,var(--neon) 7%,transparent);border-radius:12px;
+  border-left:4px solid var(--neon)}
+.tariff-math h4{font-family:'Orbitron',sans-serif;font-size:1rem;color:var(--neon);margin-bottom:.6rem}
+.tariff-math .step{font-size:.98rem;margin:.35rem 0;line-height:1.5}
+.tariff-math .final{font-family:'Orbitron',sans-serif;font-size:1.15rem;color:var(--neon2);margin-top:.55rem}
+
+.fab-reset{position:fixed;bottom:1.5rem;right:1.5rem;z-index:300;width:60px;height:60px;border-radius:50%;
+  border:2px solid var(--danger);background:color-mix(in srgb,var(--bg) 78%,transparent);color:var(--danger);
+  font-size:1.45rem;cursor:pointer;box-shadow:0 0 20px color-mix(in srgb,var(--danger) 38%,transparent);
+  display:flex;align-items:center;justify-content:center;transition:all .25s;backdrop-filter:blur(8px)}
+.fab-reset:hover{transform:scale(1.12) rotate(-12deg);background:var(--danger);color:#fff;box-shadow:0 0 30px color-mix(in srgb,var(--danger) 52%,transparent)}
+
+footer{text-align:center;padding:1.1rem;font-size:.76rem;color:var(--muted);border-top:1px solid color-mix(in srgb,var(--neon) 14%,transparent)}
+</style>
+</head>
+<body data-theme="dark" data-climate="normal">
+<div class="bg-layer"></div>
+<div class="particles" id="particles"></div>
+
+<header>
+  <div class="logos-left">
+    <img src="logo_uap.png" alt="UAP">
+    <img src="logo_acyt.png" alt="ACyT">
+    <img src="logo_sistemas.png" alt="Ingeniería de Sistemas">
+  </div>
+  <div class="header-right">
+    <button class="theme-toggle" id="themeToggle" title="Dark / Light"></button>
+    <div class="app-logo-block">
+      <img src="logo_calculo.png" alt="Cálculo" class="app-logo-img">
+      <span class="app-title">Cálculo</span>
+      <span class="bolt">⚡</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="section-label">Factor Climático · Cobija</div>
+  <div class="climate-row">
+    <button class="climate-btn" data-climate="surazo" data-duty="0.55">🌧 Surazo / Lluvia</button>
+    <button class="climate-btn active" data-climate="normal" data-duty="0.75">☀️ Calor Normal</button>
+    <button class="climate-btn" data-climate="extremo" data-duty="0.95">🔥 Calor Extremo &gt;35°C</button>
+  </div>
+
+  <div class="section-label">Catálogo de Artefactos</div>
+
+  <div class="group-title">🥶 CLIMATIZACIÓN Y REFRIGERACIÓN</div>
+  <div class="grid" id="grid1"></div>
+
+  <div class="group-title">🧺 USO INTERMITENTE Y ALTA POTENCIA</div>
+  <div class="grid" id="grid2"></div>
+
+  <div class="group-title">📺 ELECTRÓNICA Y ENTRETENIMIENTO</div>
+  <div class="grid" id="grid3"></div>
+
+  <div class="action-wrap">
+    <button class="btn-show" id="btnShow">⚡ MOSTRAR RESULTADOS DE SIMULACIÓN</button>
+  </div>
+</main>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <button class="modal-close" id="modalClose">✕</button>
+    <h2 id="modalTitle">Resultados de Simulación</h2>
+    <div class="metrics">
+      <div class="metric"><div class="lbl">Energía Total</div><div class="val" id="mKwh">0.0</div><div class="unit">kWh / mes</div></div>
+      <div class="metric"><div class="lbl">Costo Energía</div><div class="val" id="mEnergy">0.00</div><div class="unit">Bs</div></div>
+      <div class="metric"><div class="lbl">Cargo Fijo</div><div class="val" id="mFixed">12.85</div><div class="unit">Bs</div></div>
+      <div class="metric"><div class="lbl">TOTAL FACTURA</div><div class="val big" id="mTotal">0.00</div><div class="unit">Bolivianos</div></div>
+    </div>
+    <div class="modal-grid">
+      <div>
+        <table class="blocks-table">
+          <thead><tr><th>Bloque</th><th>Rango</th><th>Tarifa</th><th>Costo</th></tr></thead>
+          <tbody id="blocksBody"></tbody>
+        </table>
+      </div>
+      <div class="chart-box"><canvas id="donut"></canvas></div>
+    </div>
+    <div class="math-section">
+      <button class="math-toggle" id="mathToggle">
+        <span>📐 Ver Modelo Matemático de la Integral</span>
+        <span id="mathArrow">▼</span>
+      </button>
+      <div class="math-body" id="mathBody">
+        <div class="math-content" id="mathContent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="fab-reset" id="fabReset" title="Reiniciar">↺</button>
+<footer>CÁLCULO ⚡ · Universidad Amazónica de Pando · Ingeniería de Sistemas · Cálculo II</footer>
+
+<script>
+const GROUPS = {
+  1: [
+    // Potencias de placa (para mostrar) + potencias medias reales de consumo (avg) para el cálculo
+    {id:1,name:"Acondicionador de Aire",img:"app_ac.png",intermittent:true,
+      powers:{bajo:800,medio:1300,alto:2200},
+      avg:{bajo:200,medio:320,alto:550},
+      defP:"medio",defH:8,defD:30},
+    {id:2,name:"Refrigerador / Freezer",img:"app_fridge.png",intermittent:true,
+      powers:{bajo:100,medio:200,alto:550},
+      avg:{bajo:30,medio:60,alto:150},
+      defP:"medio",defH:24,defD:30},
+    {id:6,name:"Dispensador de Agua",img:"app_dispenser.png",intermittent:true,
+      powers:{bajo:70,medio:300,alto:550},
+      avg:{bajo:15,medio:45,alto:80},
+      defP:"medio",defH:12,defD:30}
+  ],
+  2: [
+    {id:3,name:"Lavadora de Ropa",img:"app_washer.png",intermittent:false,powers:{bajo:300,medio:500,alto:2000},defP:"medio",defH:1.5,defD:8},
+    {id:4,name:"Horno Microondas",img:"app_microwave.png",intermittent:false,powers:{bajo:800,medio:1000,alto:1400},defP:"medio",defH:0.5,defD:20},
+    {id:5,name:"Licuadora",img:"app_blender.png",intermittent:false,powers:{bajo:500,medio:800,alto:1200},defP:"medio",defH:0.3,defD:25}
+  ],
+  3: [
+    {id:7,name:"Smart TV",img:"app_tv.png",intermittent:false,powers:{bajo:55,medio:100,alto:160},defP:"medio",defH:5,defD:30},
+    {id:8,name:"Laptop",img:"app_laptop.png",intermittent:false,powers:{bajo:50,medio:60,alto:65},defP:"medio",defH:6,defD:30},
+    {id:9,name:"Ventilador",img:"app_fan.png",intermittent:false,powers:{bajo:60,medio:70,alto:85},defP:"medio",defH:14,defD:30},
+    {id:10,name:"Parlante Bluetooth",img:"app_speaker.png",intermittent:false,powers:{bajo:15,medio:20,alto:25},defP:"medio",defH:2,defD:25}
+  ]
+};
+const APPS = [...GROUPS[1],...GROUPS[2],...GROUPS[3]];
+
+let duty=0.75, selected={}, power={}, hours={}, days={}, lastE={}, chart=null;
+
+function spawnParticles(){
+  const box=document.getElementById('particles'); box.innerHTML='';
+  for(let i=0;i<60;i++){
+    const p=document.createElement('div'); p.className='particle';
+    const s=3+Math.random()*8; p.style.width=p.style.height=s+'px';
+    p.style.left=Math.random()*100+'%';
+    const base=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--pspeed'))||6.5;
+    p.style.animationDuration=(base*(0.55+Math.random()*0.9))+'s';
+    p.style.animationDelay=(Math.random()*5)+'s';
+    box.appendChild(p);
+  }
+}
+
+function renderGroup(gid, containerId){
+  const grid=document.getElementById(containerId);
+  GROUPS[gid].forEach(a=>{
+    selected[a.id]=false; power[a.id]=a.defP; hours[a.id]=a.defH; days[a.id]=a.defD;
+    const card=document.createElement('div');
+    card.className='card'; card.id='card-'+a.id;
+    card.innerHTML=`
+      <img src="${a.img}" class="card-img" alt="${a.name}">
+      <h3>${a.name}</h3>
+      <div class="check-row">
+        <input type="checkbox" class="check-box" id="chk-${a.id}" data-id="${a.id}">
+        <label for="chk-${a.id}">Incluir en simulación</label>
+      </div>
+      <div class="power-row">
+        <button class="pwr bajo ${a.defP==='bajo'?'active':''}" data-id="${a.id}" data-lv="bajo">Bajo<small>${a.powers.bajo} W</small></button>
+        <button class="pwr medio ${a.defP==='medio'?'active':''}" data-id="${a.id}" data-lv="medio">Medio<small>${a.powers.medio} W</small></button>
+        <button class="pwr alto ${a.defP==='alto'?'active':''}" data-id="${a.id}" data-lv="alto">Alto<small>${a.powers.alto} W</small></button>
+      </div>
+      <div class="inputs-block">
+        <div class="input-row">
+          <label>Horas / día<input type="number" min="0" max="24" step="0.5" value="${a.defH}" data-id="${a.id}" data-field="h" class="num-in"></label>
+          <label>Días / mes<input type="number" min="1" max="30" step="1" value="${a.defD}" data-id="${a.id}" data-field="d" class="num-in"></label>
+        </div>
+      </div>
+      <div class="card-kwh" id="kw-${a.id}">—</div>`;
+    grid.appendChild(card);
+  });
+}
+
+function bindEvents(){
+  document.querySelectorAll('.check-box').forEach(chk=>{
+    chk.addEventListener('change',()=>{
+      const id=+chk.dataset.id;
+      selected[id]=chk.checked;
+      document.getElementById('card-'+id).classList.toggle('active-card',chk.checked);
+      if(chk.checked){
+        const a=APPS.find(x=>x.id===id);
+        hours[id]=a.defH; days[id]=a.defD;
+        const card=document.getElementById('card-'+id);
+        card.querySelector('[data-field="h"]').value=a.defH;
+        card.querySelector('[data-field="d"]').value=a.defD;
+      }
+      updateCard(id);
+    });
+  });
+  document.querySelectorAll('.pwr').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const id=+btn.dataset.id; power[id]=btn.dataset.lv;
+      btn.parentElement.querySelectorAll('.pwr').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active'); updateCard(id);
+    });
+  });
+  document.querySelectorAll('.num-in').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      const id=+inp.dataset.id;
+      let v=parseFloat(inp.value);
+      if(inp.dataset.field==='h'){ if(isNaN(v)||v<0)v=0; if(v>24)v=24; hours[id]=v; }
+      else{ if(isNaN(v)||v<1)v=1; if(v>30)v=30; days[id]=v; }
+      updateCard(id);
+    });
+  });
+}
+
+function getW(id){return APPS.find(a=>a.id===id).powers[power[id]]}
+function energyOf(id){
+  if(!selected[id]) return 0;
+  const a = APPS.find(x => x.id === id);
+  const h = Number(hours[id]) || 0;
+  const d = Number(days[id]) || 0;
+  let P_watts;
+  if (a.intermittent && a.avg) {
+    // Usa potencia media real de consumo (no la potencia de placa)
+    P_watts = a.avg[power[id]] || a.avg.medio;
+    // El clima modula ligeramente el promedio (Surazo más bajo, Extremo más alto)
+    // duty: 0.55 / 0.75 / 0.95  →  normalizamos alrededor de 1.0
+    const climateFactor = (Number(duty) || 0.75) / 0.75;
+    P_watts = P_watts * climateFactor;
+  } else {
+    // Aparatos continuos: potencia de placa
+    P_watts = getW(id);
+  }
+  const E = (P_watts / 1000) * h * d;
+  return E;
+}
+function updateCard(id){
+  const E=energyOf(id);
+  lastE[id] = E;
+  document.getElementById('kw-'+id).textContent=selected[id]?`≈ ${E.toFixed(1)} kWh/mes`:'—';
+}
+
+document.querySelectorAll('.climate-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.climate-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    duty=parseFloat(btn.dataset.duty);
+    document.body.dataset.climate=btn.dataset.climate;
+    spawnParticles();
+    APPS.forEach(a=>updateCard(a.id));
+  });
+});
+document.getElementById('themeToggle').addEventListener('click',()=>{
+  document.body.dataset.theme=document.body.dataset.theme==='light'?'dark':'light';
+});
+
+function tariff(kwh){
+  const rates=[
+    {name:'Bloque 1',range:'0 – 70',rate:0.742,lim:70},
+    {name:'Bloque 2',range:'71 – 200',rate:0.865,lim:130},
+    {name:'Bloque 3',range:'201 – 500',rate:1.080,lim:300},
+    {name:'Bloque 4',range:'> 500',rate:1.220,lim:Infinity}
+  ];
+  let rem=kwh,cost=0,rows=[];
+  for(const b of rates){
+    const used=Math.min(rem,b.lim); const c=used*b.rate; cost+=c;
+    rows.push({...b,used,c}); rem-=used; if(rem<=0) break;
+  }
+  while(rows.length<4){const b=rates[rows.length]; rows.push({...b,used:0,c:0});}
+  return {energy:cost,fixed:12.85,total:cost+12.85,rows};
+}
+
+function buildMathHTML(parts,totalK,t){
+  let html='';
+  parts.forEach(p=>{
+    const T=(p.h*p.d).toFixed(0);
+    const P=p.W;
+    const PkW=(P/1000).toFixed(3);
+    const delta=p.inter?duty:1;
+    const E=p.E;
+    html+=`<div class="math-block">
+      <div class="app-name">${p.name}</div>`;
+    if(p.inter){
+      const Peff = (E / (p.h * p.d) * 1000); // potencia media efectiva usada
+      html+=`<div class="model-label">Modelo de Potencia Media Efectiva (Compresor / Termostato)</div>
+        <div class="eq-line">
+          E = <span class="int">∫</span><sub class="lim">0</sub><sup class="lim">${T}</sup>
+          <span class="frac"><span class="num">P<sub>eff</sub></span><span class="den">1000</span></span> dt
+        </div>
+        <ul class="where-list">
+          <li><strong>T</strong> = Tiempo acumulado = (${p.h} h/día × ${p.d} días) = <strong>${T} h</strong></li>
+          <li><strong>P<sub>eff</sub></strong> = Potencia media real de consumo ≈ <strong>${Peff.toFixed(0)} W</strong> (no la potencia de placa)</li>
+          <li>El compresor/termostato solo trabaja una fracción del tiempo; se usa el valor medio medido en hogares de Pando.</li>
+          <li>El clima seleccionado ajusta ligeramente P<sub>eff</sub> (Surazo ↓ / Extremo ↑).</li>
+          <li><strong>1000</strong> = Factor de conversión W → kW</li>
+        </ul>
+        <div class="eq-line">E = ${ (Peff/1000).toFixed(3) } · ${T}</div>
+        <div class="eq-result">E = <strong>${E.toFixed(2)} kWh</strong></div>`;
+    } else {
+      html+=`<div class="model-label">Modelo de Consumo Continuo (Potencia Constante)</div>
+        <div class="eq-line">
+          E = <span class="int">∫</span><sub class="lim">0</sub><sup class="lim">${T}</sup>
+          <span class="frac"><span class="num">P</span><span class="den">1000</span></span> dt
+        </div>
+        <ul class="where-list">
+          <li><strong>T</strong> = (${p.h} h/día × ${p.d} días) = <strong>${T} h</strong></li>
+          <li><strong>P</strong> = ${P} W &nbsp;→&nbsp; ${PkW} kW</li>
+          <li><strong>1000</strong> = Factor de conversión W → kW</li>
+        </ul>
+        <div class="eq-line">E = ${PkW} · ${T}</div>
+        <div class="eq-result">E = <strong>${E.toFixed(2)} kWh</strong></div>`;
+    }
+    html+='</div>';
+  });
+
+  if(parts.length>1){
+    html+=`<div class="math-block">
+      <div class="app-name">Sumatoria Total</div>
+      <div class="eq-line">E<sub>total</sub> = Σ E<sub>i</sub> = <strong>${totalK.toFixed(2)} kWh</strong></div>
+    </div>`;
+  }
+
+  // Tariff explicit
+  html+=`<div class="tariff-math">
+    <h4>Función Tarifaria Segmentada · ENDE Cobija</h4>`;
+  let rem=totalK;
+  const rates=[{n:'Bloque 1 (0–70)',r:0.742,l:70},{n:'Bloque 2 (71–200)',r:0.865,l:130},{n:'Bloque 3 (201–500)',r:1.080,l:300},{n:'Bloque 4 (>500)',r:1.220,l:Infinity}];
+  rates.forEach((b,i)=>{
+    const used=Math.min(Math.max(rem,0),b.l);
+    if(used>0.001 || i===0){
+      html+=`<div class="step">${b.n}: ${used.toFixed(2)} kWh × ${b.r.toFixed(3)} Bs/kWh = <strong>${(used*b.r).toFixed(2)} Bs</strong></div>`;
+    }
+    rem-=used;
+  });
+  html+=`<div class="step">Cargo Fijo Mensual = <strong>12.85 Bs</strong></div>
+    <div class="final">TOTAL FACTURA = ${t.energy.toFixed(2)} + 12.85 = <strong>${t.total.toFixed(2)} Bs</strong></div>
+  </div>`;
+  return html;
+}
+
+function showResults(){
+  const active=APPS.filter(a=>selected[a.id]);
+  if(active.length===0){alert('Selecciona al menos un artefacto con el checkbox.');return;}
+  // ENERGÍA TOTAL = suma estricta de los kWh ya mostrados en las tarjetas (lastE)
+  // No se vuelve a aplicar duty ni se recalcula la integral aquí.
+  let totalK=0; const parts=[];
+  active.forEach(a=>{
+    const E = (typeof lastE[a.id] === 'number') ? lastE[a.id] : energyOf(a.id);
+    totalK += E;
+    parts.push({name:a.name,E,W:getW(a.id),h:hours[a.id],d:days[a.id],inter:a.intermittent});
+  });
+  // Redondeo a 1 decimal para coherencia visual con las tarjetas
+  totalK = Math.round(totalK * 10) / 10;
+  const t=tariff(totalK);
+
+  document.getElementById('mKwh').textContent=totalK.toFixed(1);
+  document.getElementById('mEnergy').textContent=t.energy.toFixed(2);
+  document.getElementById('mFixed').textContent=t.fixed.toFixed(2);
+  document.getElementById('mTotal').textContent=t.total.toFixed(2);
+  document.getElementById('modalTitle').textContent=active.length===1?active[0].name:`${active.length} Artefactos Combinados`;
+
+  document.getElementById('blocksBody').innerHTML=t.rows.map(r=>`
+    <tr><td>${r.name}</td><td>${r.range} kWh</td><td>${r.rate.toFixed(3)}</td><td>${r.c.toFixed(2)} Bs</td></tr>
+  `).join('')+`<tr style="font-weight:800;border-top:2px solid color-mix(in srgb,var(--neon) 40%,transparent)">
+    <td colspan="3">Total (Energía + Fijo)</td><td>${t.total.toFixed(2)} Bs</td></tr>`;
+
+  const ctx=document.getElementById('donut').getContext('2d');
+  if(chart) chart.destroy();
+  const cols=['#00e5ff','#00e676','#ffea00','#ff1744','#aa66ff','#ff6d00','#00bcd4','#f06292','#aeea00','#7c4dff'];
+  chart=new Chart(ctx,{
+    type:'doughnut',
+    data:{labels:parts.map(p=>p.name.split(' ')[0]),datasets:[{data:parts.map(p=>p.E),backgroundColor:cols.slice(0,parts.length),borderWidth:3,borderColor:getComputedStyle(document.body).getPropertyValue('--bg').trim()||'#030812',hoverOffset:10}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'58%',
+      plugins:{legend:{position:'bottom',labels:{color:getComputedStyle(document.documentElement).getPropertyValue('--text').trim()||'#e8f4ff',font:{size:11,family:'Exo 2'},padding:10,boxWidth:12}}}}
+  });
+
+  document.getElementById('mathContent').innerHTML=buildMathHTML(parts,totalK,t);
+  document.getElementById('mathBody').classList.remove('open');
+  document.getElementById('mathArrow').textContent='▼';
+  document.getElementById('modal').classList.add('open');
+}
+
+document.getElementById('btnShow').addEventListener('click',showResults);
+document.getElementById('modalClose').addEventListener('click',()=>document.getElementById('modal').classList.remove('open'));
+document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')document.getElementById('modal').classList.remove('open')});
+document.getElementById('mathToggle').addEventListener('click',()=>{
+  const body=document.getElementById('mathBody');
+  const open=body.classList.toggle('open');
+  document.getElementById('mathArrow').textContent=open?'▲':'▼';
+});
+document.getElementById('fabReset').addEventListener('click',()=>{
+  document.querySelectorAll('.check-box').forEach(c=>c.checked=false);
+  APPS.forEach(a=>{
+    selected[a.id]=false;
+    lastE[a.id]=0;
+    document.getElementById('card-'+a.id).classList.remove('active-card');
+    power[a.id]=a.defP; hours[a.id]=a.defH; days[a.id]=a.defD;
+    const card=document.getElementById('card-'+a.id);
+    card.querySelectorAll('.pwr').forEach(b=>b.classList.toggle('active',b.dataset.lv===a.defP));
+    card.querySelector('[data-field="h"]').value=a.defH;
+    card.querySelector('[data-field="d"]').value=a.defD;
+    updateCard(a.id);
+  });
+  document.getElementById('modal').classList.remove('open');
+  if(chart){chart.destroy();chart=null;}
+});
+
+spawnParticles();
+renderGroup(1,'grid1'); renderGroup(2,'grid2'); renderGroup(3,'grid3');
+bindEvents();
+</script>
+</body>
+</html>
